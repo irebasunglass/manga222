@@ -22,6 +22,7 @@ Apple Silicon (M1/M2/M3/M4) のMPS (Metal Performance Shaders) を活用し、�
   - Windows/Linux with NVIDIA GPU - CUDA対応（高速）
   - その他の環境でもCPUで動作します（やや遅い）
 - PyTorch（GPU対応版を推奨）
+- VOICEVOX Engine（監視モードの読み上げ機能を使う場合）
 
 ## インストール
 

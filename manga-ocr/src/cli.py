@@ -1,6 +1,9 @@
 """CLIエントリーポイント"""
 
+from __future__ import annotations
+
 import argparse
+import hashlib
 import sys
 import tempfile
 import time
@@ -76,7 +79,7 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--temp-dir",
+        "--voicevox-url",
         type=str,
         default=None,
         help="一時ディレクトリを指定（デフォルト: システムの一時ディレクトリ）",
