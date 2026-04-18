@@ -4,6 +4,7 @@ import sys
 import threading
 import tempfile
 import time
+import hashlib
 import ctypes
 import ctypes.wintypes
 from pathlib import Path
@@ -247,6 +248,7 @@ class MangaReaderApp:
         self.last_audio_file = None
         self.last_capture_file = None
         self.capture_delay_var = tk.IntVar(value=3)
+        self.monitor_interval_var = tk.DoubleVar(value=1.2)
 
         self.base_url_var = tk.StringVar(value="http://127.0.0.1:50021")
         self.status_var = tk.StringVar(value="起動後は『接続確認』→『話者一覧更新』を押してください。")
@@ -255,6 +257,8 @@ class MangaReaderApp:
         self.auto_clipboard_var = tk.BooleanVar(value=False)
         self.last_clipboard_text = ""
         self.auto_speak_var = tk.BooleanVar(value=True)
+        self.monitor_running = False
+        self.monitor_stop_event = threading.Event()
 
         self.build_ui()
         self.root.after(1200, self.clipboard_loop)
@@ -290,6 +294,10 @@ class MangaReaderApp:
         ttk.Button(capture_frame, text="画像からOCR", command=self.ocr_from_image).pack(side="left", padx=4)
         ttk.Button(capture_frame, text="最後の画像を開く", command=self.open_last_capture).pack(side="left", padx=4)
         ttk.Checkbutton(capture_frame, text="OCR後に自動で読む", variable=self.auto_speak_var).pack(side="left", padx=10)
+        ttk.Label(capture_frame, text="監視間隔秒").pack(side="left")
+        ttk.Spinbox(capture_frame, from_=0.5, to=10.0, increment=0.1, textvariable=self.monitor_interval_var, width=5).pack(side="left", padx=(4, 8))
+        ttk.Button(capture_frame, text="アクティブ監視開始", command=self.start_active_window_monitor).pack(side="left", padx=4)
+        ttk.Button(capture_frame, text="監視停止", command=self.stop_active_window_monitor).pack(side="left", padx=4)
 
         ocr_frame = ttk.LabelFrame(self.root, text="セリフ入力", padding=10)
         ocr_frame.pack(fill="both", expand=True, padx=10, pady=6)
@@ -453,6 +461,54 @@ class MangaReaderApp:
             threading.Thread(target=lambda: self._ocr_and_fill(tmp_path), daemon=True).start()
 
         threading.Thread(target=task, daemon=True).start()
+
+    @staticmethod
+    def _image_fingerprint(img: Image.Image) -> str:
+        small = img.convert("L").resize((64, 64), Image.Resampling.BILINEAR)
+        return hashlib.sha1(small.tobytes()).hexdigest()
+
+    def start_active_window_monitor(self):
+        if self.monitor_running:
+            self.set_status("アクティブ画面の監視はすでに実行中です。")
+            return
+        interval = max(0.5, float(self.monitor_interval_var.get()))
+        self.monitor_stop_event.clear()
+        self.monitor_running = True
+
+        def task():
+            prev_hash = None
+            self.set_status("アクティブ画面監視を開始しました。ページが変わると自動OCRします。")
+            while not self.monitor_stop_event.is_set():
+                try:
+                    bbox = None
+                    if sys.platform.startswith("win"):
+                        bbox = self._get_active_window_bbox_windows()
+                    img = ImageGrab.grab(bbox=bbox, all_screens=True)
+                    current_hash = self._image_fingerprint(img)
+                    if prev_hash is None:
+                        prev_hash = current_hash
+                    elif current_hash != prev_hash:
+                        prev_hash = current_hash
+                        fd, tmp_path = tempfile.mkstemp(suffix="_active_changed.png")
+                        os.close(fd)
+                        img.save(tmp_path)
+                        self.last_capture_file = tmp_path
+                        self.set_status("ページ変化を検出しました。OCRして読み上げます。")
+                        self._ocr_and_fill(tmp_path)
+                except Exception as e:
+                    self.set_status(f"監視中にエラーが発生しました: {e}")
+                if self.monitor_stop_event.wait(interval):
+                    break
+            self.monitor_running = False
+            self.set_status("アクティブ画面の監視を停止しました。")
+
+        threading.Thread(target=task, daemon=True).start()
+
+    def stop_active_window_monitor(self):
+        if not self.monitor_running:
+            self.set_status("アクティブ画面の監視は停止中です。")
+            return
+        self.monitor_stop_event.set()
 
     def open_last_capture(self):
         if not self.last_capture_file or not Path(self.last_capture_file).exists():
