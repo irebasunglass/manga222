@@ -1,0 +1,8 @@
+requests
+pillow
+easyocr
+playsound==1.2.2
+pygetwindow
+mss
+numpy
+opencv-python
