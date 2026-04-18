@@ -7,6 +7,7 @@ Apple Silicon (M1/M2/M3/M4) のMPS (Metal Performance Shaders) を活用し、�
 ## 機能
 
 - ✅ Zipファイルから漫画画像を一括処理
+- ✅ アクティブウィンドウを直接キャプチャしてOCR処理
 - ✅ 複雑なコマ割りや自由なセリフ配置に対応したテキスト領域（吹き出し）の自動検出
 - ✅ 漫画の読み順に基づいたテキスト抽出 (ただし、意図しない順番になるケースもあります)
 - ✅ ページごとのセリフ読み取り精度が高いOCR処理
@@ -86,6 +87,9 @@ pip install -r requirements.txt
 ```bash
 # 基本的な使用
 python3 -m src.cli comic.zip
+
+# アクティブウィンドウを2秒後にキャプチャしてOCR
+python3 -m src.cli --active-window
 ```
 
 ### コマンドオプション
@@ -105,6 +109,10 @@ python3 -m src.cli comic.zip
 - **CPUを強制使用:**
   ```bash
   python3 -m src.cli comic.zip --device cpu
+  ```
+- **アクティブウィンドウをOCR:**
+  ```bash
+  python3 -m src.cli --active-window --capture-delay 3
   ```
 - **エラー時に処理を中断:**
   ```bash
