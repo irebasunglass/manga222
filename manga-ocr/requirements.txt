@@ -4,8 +4,8 @@ torchvision>=0.15.0
 numpy<2.0.0  # comic-text-detector compatibility
 
 # OCR and Text Detection
-# comic-text-detector: GitHubƒŠƒ|ƒWƒgƒŠ‚©‚çƒCƒ“ƒXƒg[ƒ‹‚ª•K—v
-# —á: pip install git+https://github.com/<owner>/comic-text-detector.git
+# comic-text-detector ã¯ GitHub ãƒªãƒã‚¸ãƒˆãƒªã‹ã‚‰ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ãŒå¿…è¦
+# ä¾‹: pip install git+https://github.com/<owner>/comic-text-detector.git
 
 # Image Processing
 Pillow>=10.0.0
@@ -22,16 +22,11 @@ shapely>=2.0.0
 
 # CLI and Utilities
 click>=8.1.0
-
-# Progress Bar
 tqdm>=4.66.0
-
-# Logging (optional, using standard library for now)
-# loguru>=0.7.0
+requests>=2.31.0
 
 # Testing
 pytest>=7.0.0
 
 # Clustering for panel detection
 scikit-learn>=1.0.0
-

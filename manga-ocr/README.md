@@ -7,6 +7,8 @@ Apple Silicon (M1/M2/M3/M4) のMPS (Metal Performance Shaders) を活用し、�
 ## 機能
 
 - ✅ Zipファイルから漫画画像を一括処理
+- ✅ アクティブウィンドウを直接キャプチャしてOCR処理
+- ✅ アクティブウィンドウを監視して変化ごとにOCR+VOICEVOX読み上げ
 - ✅ 複雑なコマ割りや自由なセリフ配置に対応したテキスト領域（吹き出し）の自動検出
 - ✅ 漫画の読み順に基づいたテキスト抽出 (ただし、意図しない順番になるケースもあります)
 - ✅ ページごとのセリフ読み取り精度が高いOCR処理
@@ -21,6 +23,7 @@ Apple Silicon (M1/M2/M3/M4) のMPS (Metal Performance Shaders) を活用し、�
   - Windows/Linux with NVIDIA GPU - CUDA対応（高速）
   - その他の環境でもCPUで動作します（やや遅い）
 - PyTorch（GPU対応版を推奨）
+- VOICEVOX Engine（監視モードの読み上げ機能を使う場合）
 
 ## インストール
 
@@ -86,6 +89,12 @@ pip install -r requirements.txt
 ```bash
 # 基本的な使用
 python3 -m src.cli comic.zip
+
+# アクティブウィンドウを2秒後にキャプチャしてOCR
+python3 -m src.cli --active-window
+
+# 監視モード（画面変化ごとにOCR+VOICEVOX読み上げ）
+python3 -m src.cli --watch-active-window --poll-interval 0.8
 ```
 
 ### コマンドオプション
@@ -105,6 +114,14 @@ python3 -m src.cli comic.zip
 - **CPUを強制使用:**
   ```bash
   python3 -m src.cli comic.zip --device cpu
+  ```
+- **アクティブウィンドウをOCR:**
+  ```bash
+  python3 -m src.cli --active-window --capture-delay 3
+  ```
+- **アクティブウィンドウ監視 + 読み上げ:**
+  ```bash
+  python3 -m src.cli --watch-active-window --voicevox-url http://127.0.0.1:50021 --voicevox-speaker 1
   ```
 - **エラー時に処理を中断:**
   ```bash
