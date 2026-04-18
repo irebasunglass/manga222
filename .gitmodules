@@ -1,0 +1,3 @@
+[submodule "manga-ocr/vendor/comic-text-detector"]
+	path = manga-ocr/vendor/comic-text-detector
+	url = https://github.com/dmMaze/comic-text-detector.git
